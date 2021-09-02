@@ -1,0 +1,30 @@
+<ion-app>
+  <ion-split-pane contentId="main-content">
+    <ion-menu contentId="main-content" type="overlay">
+      <ion-content>
+        <ion-list class="inbox-list">
+          <ion-list-header>Expertise Smartphone</ion-list-header>
+          <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/home" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="home"></ion-icon>
+              <ion-label>Home</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+          <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/take-photo" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="camera"></ion-icon>
+              <ion-label>Take a photo</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+          <ion-menu-toggle autoHide="false">
+            <ion-item routerLink="/appointment" routerLinkActive="active" routerDirection="root" detail="false">
+              <ion-icon slot="start" name="calendar-outline"></ion-icon>
+              <ion-label>Appointment</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+    <ion-router-outlet id="main-content"></ion-router-outlet>
+  </ion-split-pane>
+</ion-app>

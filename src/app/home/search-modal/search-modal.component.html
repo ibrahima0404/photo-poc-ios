@@ -1,0 +1,16 @@
+<ion-header translucent>
+  <ion-toolbar>
+    <ion-title>Rendez-vous</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar showCancelButton="always" (ionCancel)="dismiss()" cancelButtonText="Annuler"
+      placeholder="Recherche" (ionChange)="searchMission($event)"></ion-searchbar>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-list *ngFor="let mission of missionsToShow">
+    <ion-item (click)="appointmentDetails()">
+      <ion-label>{{mission}}</ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

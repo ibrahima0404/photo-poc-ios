@@ -1,0 +1,41 @@
+<ion-header translucent>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="dismiss()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Préférences</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-list>
+    <ion-item>
+      <ion-avatar slot="start">
+        <img src="/assets/avatar.svg">
+      </ion-avatar>
+      <ion-label>Gilles BERTRAND</ion-label>
+    </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-list-header>Général</ion-list-header>
+    <ion-item>
+      <ion-label>Garder une copie des photos</ion-label>
+      <ion-toggle slot="end"></ion-toggle>
+    </ion-item>
+    <ion-item>
+      <ion-label>Synchroniser au démarrage</ion-label>
+      <ion-toggle slot="end"></ion-toggle>
+    </ion-item>
+    <ion-item>
+      <ion-label text-wrap>Insérer automatiquement les documents dans la mission (sans typage ni renommage)</ion-label>
+      <ion-toggle slot="end"></ion-toggle>
+    </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-list-header>À propos</ion-list-header>
+    <ion-item>
+      <ion-label>Version : {{ version }}</ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

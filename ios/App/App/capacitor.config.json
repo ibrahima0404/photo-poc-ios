@@ -1,0 +1,6 @@
+{
+	"appId": "ionic.ios.sesame.poc.sar",
+	"appName": "sar.poc.sesame.ios.ionic",
+	"webDir": "www",
+	"bundledWebRuntime": false
+}
