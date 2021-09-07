@@ -19,6 +19,7 @@
 		86003DA926E0F63E00C9C572 /* SharePoc.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 86003D9F26E0F63E00C9C572 /* SharePoc.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		86003DB126E11DDF00C9C572 /* PluginShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86003DB026E11DDF00C9C572 /* PluginShare.swift */; };
 		86003DB426E120DD00C9C572 /* PluginShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 86003DB326E120DD00C9C572 /* PluginShare.m */; };
+		86C4DF1426E74B490084EE9F /* ShareStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C4DF1326E74B490084EE9F /* ShareStore.swift */; };
 		A084ECDBA7D38E1E42DFC39D /* Pods_App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */; };
 /* End PBXBuildFile section */
 
@@ -65,6 +66,7 @@
 		86003DB026E11DDF00C9C572 /* PluginShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginShare.swift; sourceTree = "<group>"; };
 		86003DB226E120DD00C9C572 /* App-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "App-Bridging-Header.h"; sourceTree = "<group>"; };
 		86003DB326E120DD00C9C572 /* PluginShare.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PluginShare.m; sourceTree = "<group>"; };
+		86C4DF1326E74B490084EE9F /* ShareStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStore.swift; sourceTree = "<group>"; };
 		AF277DCFFFF123FFC6DF26C7 /* Pods_App.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_App.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF51FD2D460BCFE21FA515B2 /* Pods-App.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.release.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.release.xcconfig"; sourceTree = "<group>"; };
 		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
@@ -132,6 +134,7 @@
 				86003DB026E11DDF00C9C572 /* PluginShare.swift */,
 				86003DB326E120DD00C9C572 /* PluginShare.m */,
 				86003DB226E120DD00C9C572 /* App-Bridging-Header.h */,
+				86C4DF1326E74B490084EE9F /* ShareStore.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -304,6 +307,7 @@
 				86003DB126E11DDF00C9C572 /* PluginShare.swift in Sources */,
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
 				86003DB426E120DD00C9C572 /* PluginShare.m in Sources */,
+				86C4DF1426E74B490084EE9F /* ShareStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

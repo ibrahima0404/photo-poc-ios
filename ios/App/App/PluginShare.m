@@ -8,5 +8,5 @@
 #import <Foundation/Foundation.h>
 #import <Capacitor/Capacitor.h>
 CAP_PLUGIN(PluginShare, "PluginShare",
-           CAP_PLUGIN_METHOD(getSharedPhotos, CAPPluginReturnPromise);
+           CAP_PLUGIN_METHOD(checkSendIntentReceived, CAPPluginReturnPromise);
 )

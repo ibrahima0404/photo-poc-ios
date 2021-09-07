@@ -32,19 +32,17 @@ export class HomePage implements OnInit {
   ngOnInit() {
     this.nextAppointment = this.appointmentService.loadFirstAppointment();
     this.appointments = this.appointmentService.loadAppointments();
+    window.addEventListener("sendIntentReceived", () => {
+      PluginShare.checkSendIntentReceived().then((result: any) => {
+        let images = result.image .split(";");
+        console.log('result', images.length);
+        //this.image1 = this._sanitizer.bypassSecurityTrustResourceUrl(`data:image/png;base64, ${result.image}`);
+          if (result.text) {
+           
+          }
+      });
+  })
   }
-
-  async getSharedPhotos(){
-    const result = await PluginShare.getSharedPhotos()
-    this.listImages = result.listImages;
-    let images = this.listImages .split(";");
-    let img = images[2];
-    console.log('listImages', images.length);
-    
-    this.image1 = this._sanitizer.bypassSecurityTrustResourceUrl(`data:image/png;base64, ${images[0]}`); //result.image
-    this.image2 = this._sanitizer.bypassSecurityTrustResourceUrl(`data:image/png;base64, ${images[1]}`);
-    this.image3 = this._sanitizer.bypassSecurityTrustResourceUrl(`data:image/png;base64, ${images[2]}`);
-}
 
   async openSearchModal() {
     const modal = await this.modalController.create({

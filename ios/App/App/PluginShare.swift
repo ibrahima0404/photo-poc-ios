@@ -11,41 +11,29 @@ import Photos
 
 @objc(PluginShare)
 public class PluginShare: CAPPlugin {
-    private let groupName = "group.ionic.ios.sesame.poc.sar.entreprise"
-    @objc func getSharedPhotos(_ call: CAPPluginCall) {
-        let userDefault = UserDefaults(suiteName: groupName)
-        
-        if let photos = userDefault?.value(forKey: "images") as? [String: String] {
-            var strBase64String = ""
-            for photo in photos {
-                let imgPath = getImagePath(imageName: photo.key)
-                let imageData = UIImage(contentsOfFile: imgPath)
-                let imageDataJpeg = imageData?.jpegData(compressionQuality: 1)
-                guard let base64String = imageDataJpeg?.base64EncodedString() else {
-                    print("Error encoding to base64")
-                    return
-                }
-                strBase64String += "\(base64String);"
-            }
-            
-            call.resolve(["listImages": strBase64String.dropLast()])
+    
+    let store = ShareStore.store
+
+    @objc func checkSendIntentReceived(_ call: CAPPluginCall) {
+        if !store.processed {
+            call.resolve([
+                "text": store.text,
+                "url": store.url,
+                "image": store.image,
+                "file": store.file
+            ])
+            store.processed = true
+        } else {
+            call.reject("No processing needed.")
         }
     }
-    
-    private func getImagePath(imageName: String) -> String {
-        guard var fileManager = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupName) else {
-            print("Error: No containe with groupId \(groupName)")
-            return ""
-        }
-        
-        fileManager.appendPathComponent("\(imageName)")
-        
-        let imagePath = fileManager.absoluteString.split(separator: ":")[1].replacingOccurrences(of: "///", with: "/")
-        if FileManager().fileExists(atPath: imagePath) {
-            return imagePath
-        } else {
-            print("Error: path doesn't exist \(imagePath)")
-            return ""
-        }
+
+    public override func load() {
+        let nc = NotificationCenter.default
+            nc.addObserver(self, selector: #selector(eval), name: Notification.Name("triggerSendIntent"), object: nil)
+    }
+
+    @objc open func eval(){
+        self.bridge?.eval(js: "window.dispatchEvent(new Event('sendIntentReceived'))");
     }
 }

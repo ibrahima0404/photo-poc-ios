@@ -9,24 +9,28 @@ import UIKit
 import Social
 import CoreServices
 
-class ShareViewController: UIViewController {
+protocol  ShareViewControllerDelegate {
+    func didFinishLoadImage(isImagesLoaded: Bool)
+}
+class ShareViewController: SLComposeServiceViewController, ShareViewControllerDelegate {
     
-    private let typeText = String(kUTTypeText)
-    private let typeURL = String(kUTTypeURL)
-    private let appURL = "sar.poc.sesame.ios.ionic://"
-    private let groupName = "group.ionic.ios.sesame.poc.sar.entreprise"
+    private var imageString: String?
+    private var fileString: String?
+    var delegate: ShareViewControllerDelegate?
     
+    private var appURL = "sar.poc.sesame.ios.ionic://?text="
+   
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         handleSharedImages()
     }
 
     private func openMainApp() {
+        appURL = appURL + "&url=" + appURL
+        appURL = appURL + "&image=" + (self.imageString ?? "")
+        appURL = appURL + "&file=" + (self.fileString?.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? "")
+        let url = URL(string:  appURL)!
         self.extensionContext?.completeRequest(returningItems: nil, completionHandler: { _ in
-            guard let url = URL(string: self.appURL) else {
-                print("Error bad url")
-                return
-            }
             _ = self.openURL(url)
         })
     }
@@ -44,11 +48,12 @@ class ShareViewController: UIViewController {
         }
         return false
     }
-    
+
     private func handleSharedImages() {
         var imageNames = [String: String]()
         let attachments = (self.extensionContext?.inputItems.first as? NSExtensionItem)?.attachments ?? []
         let contentType = kUTTypeData as String
+        var strBase64String = ""
         
         for index in 0..<attachments.count {
             let provider = attachments[index]
@@ -61,40 +66,30 @@ class ShareViewController: UIViewController {
 
                     if let url = data as? URL, let imageData = try? Data(contentsOf: url) {
                         let imageName = "image\(index)"
-                        saveDataBase64(imageName: imageName, imageData: imageData)
+                        let imageData2 = UIImage(data: imageData)
+                        let imageDataJpeg = imageData2?.jpegData(compressionQuality: 0.0)
+                        guard let base64String = imageDataJpeg?.base64EncodedString() else {
+                            print("Error converting to base64")
+                            return
+                        }
+                                                
                         imageNames[imageName] = imageName
+                        strBase64String += "\(base64String);"
                         if index == (attachments.count - 1) {
-                            self.saveImagesName(imageNames: imageNames , key: "images")
+                            self.imageString = String(strBase64String.dropLast())
+                            self.delegate = self
+                            delegate?.didFinishLoadImage(isImagesLoaded: true)
                         }
                     }else {
                         print("Couldn't process item")
                     }
-                    self.openMainApp()
                 }
             }
         }
     }
     
-    private func saveDataBase64(imageName: String, imageData: Data) {
-        guard let fileManager = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupName) else {
-            print("Error: No containe with groupId \(groupName)")
-            return
-        }
-        
-        let imageURL = URL(string: "\(fileManager)\(imageName)")!
-        
-        do {
-            try imageData.write(to: imageURL, options: .atomic)
-        }
-        catch {
-            print("Error writing data \(error.localizedDescription)")
-        }
-    }
-    
-    private func saveImagesName(imageNames: [String: String], key: String) {
-        if let userDefaults = UserDefaults(suiteName: groupName) {
-            userDefaults.set(imageNames, forKey: key)
-        }
+    func didFinishLoadImage(isImagesLoaded: Bool) {
+        self.openMainApp()
     }
 }
 
