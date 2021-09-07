@@ -36,10 +36,6 @@ export class HomePage implements OnInit {
       PluginShare.checkSendIntentReceived().then((result: any) => {
         let images = result.image .split(";");
         console.log('result', images.length);
-        //this.image1 = this._sanitizer.bypassSecurityTrustResourceUrl(`data:image/png;base64, ${result.image}`);
-          if (result.text) {
-           
-          }
       });
   })
   }

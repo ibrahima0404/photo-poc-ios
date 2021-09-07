@@ -12,6 +12,7 @@ import CoreServices
 protocol  ShareViewControllerDelegate {
     func didFinishLoadImage(isImagesLoaded: Bool)
 }
+
 class ShareViewController: SLComposeServiceViewController, ShareViewControllerDelegate {
     
     private var imageString: String?
@@ -19,7 +20,6 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
     private var delegate: ShareViewControllerDelegate?
     private let messageLoadingSeveralPhotos = "Chargement de %@ vos photos"
     private let messageLoadingOnePhoto = "Chargement de votre photo"
-    
     private var appURL = "sar.poc.sesame.ios.ionic://?text="
     
     let spinner = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
@@ -27,6 +27,7 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
         setupLoadingView()
         handleSharedImages()
     }
@@ -45,8 +46,12 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
         customView.addSubview(spinner)
         customView.addSubview(infoLabel)
         view.addSubview(customView)
-        spinner.centerXAnchor.constraint(equalTo: customView.centerXAnchor).isActive = true
-        spinner.centerYAnchor.constraint(equalTo: customView.centerYAnchor).isActive = true
+        
+        NSLayoutConstraint.activate([
+            spinner.centerXAnchor.constraint(equalTo: customView.centerXAnchor),
+            spinner.centerYAnchor.constraint(equalTo: customView.centerYAnchor),
+            ])
+        
         NSLayoutConstraint.activate([
             infoLabel.bottomAnchor.constraint(equalTo: spinner.topAnchor, constant: -20),
             infoLabel.centerXAnchor.constraint(equalTo: customView.centerXAnchor),
@@ -85,7 +90,6 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
     }
 
     private func handleSharedImages() {
-        var imageNames = [String: String]()
         let attachments = (self.extensionContext?.inputItems.first as? NSExtensionItem)?.attachments ?? []
         let contentType = kUTTypeData as String
         var strBase64String = ""
@@ -101,15 +105,13 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
                     }
 
                     if let url = data as? URL, let imageData = try? Data(contentsOf: url) {
-                        let imageName = "image\(index)"
-                        let imageData2 = UIImage(data: imageData)
-                        let imageDataJpeg = imageData2?.jpegData(compressionQuality: 0.0)
+                        let uiImageData = UIImage(data: imageData)
+                        let imageDataJpeg = uiImageData?.jpegData(compressionQuality: 0.0)
                         guard let base64String = imageDataJpeg?.base64EncodedString() else {
                             print("Error converting to base64")
                             return
                         }
                                                 
-                        imageNames[imageName] = imageName
                         strBase64String += "\(base64String);"
                         if index == (attachments.count - 1) {
                             self.imageString = String(strBase64String.dropLast())
