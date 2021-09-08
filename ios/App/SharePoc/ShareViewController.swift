@@ -43,7 +43,7 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
         spinner.startAnimating()
         
         let customView = UIView(frame: view.frame)
-        customView.backgroundColor = #colorLiteral(red: 0.6862745098, green: 0.07843137255, blue: 0.1176470588, alpha: 1)
+        customView.backgroundColor = UIColor(red: 175/255, green: 20/255, blue: 30/255, alpha: 1)
         
         customView.addSubview(spinner)
         customView.addSubview(infoLabel)
