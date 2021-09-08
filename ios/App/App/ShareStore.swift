@@ -15,6 +15,7 @@ public final class ShareStore {
         self.url = ""
         self.image = ""
         self.file = ""
+        self.audio = ""
         self.processed = false
     }
 
@@ -22,5 +23,6 @@ public final class ShareStore {
     public var url: String;
     public var image: String;
     public var file: String;
+    public var audio: String;
     public var processed: Bool;
 }

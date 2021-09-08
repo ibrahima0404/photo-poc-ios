@@ -10,12 +10,13 @@ import Social
 import CoreServices
 
 protocol  ShareViewControllerDelegate {
-    func didFinishLoadImage(isImagesLoaded: Bool)
+    func didFinishLoadingAttachment(isAttachmentLoaded: Bool)
 }
 
 class ShareViewController: SLComposeServiceViewController, ShareViewControllerDelegate {
     
     private var imageString: String?
+    private var audioString: String?
     private var fileString: String?
     private var delegate: ShareViewControllerDelegate?
     private let messageLoadingSeveralPhotos = "Chargement de %@ vos photos"
@@ -27,7 +28,8 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+        self.delegate = self
+
         setupLoadingView()
         handleSharedImages()
     }
@@ -68,6 +70,7 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
     private func openMainApp() {
         appURL = appURL + "&url=" + appURL
         appURL = appURL + "&image=" + (self.imageString ?? "")
+        appURL = appURL + "&audio=" + (self.audioString ?? "")
         appURL = appURL + "&file=" + (self.fileString?.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? "")
         let url = URL(string:  appURL)!
         self.extensionContext?.completeRequest(returningItems: nil, completionHandler: { _ in
@@ -91,14 +94,18 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
 
     private func handleSharedImages() {
         let attachments = (self.extensionContext?.inputItems.first as? NSExtensionItem)?.attachments ?? []
-        let contentType = kUTTypeData as String
+        let contentTypeImage = kUTTypeJPEG as String
+        let contentTypePDF = kUTTypePDF as String
+        let contentTypeAudio = kUTTypeAudio as String
+        
         var strBase64String = ""
         
         setupLoadingMessage(with: attachments.count)
         for index in 0..<attachments.count {
             let provider = attachments[index]
-            if provider.hasItemConformingToTypeIdentifier(contentType) {
-                provider.loadItem(forTypeIdentifier: contentType, options: nil) { [unowned self] (data, error) in
+            if provider.hasItemConformingToTypeIdentifier(contentTypeImage) {
+                print("Content type Image")
+                provider.loadItem(forTypeIdentifier: contentTypeImage, options: nil) { [unowned self] (data, error) in
                     guard error == nil else {
                         print("Error loading item: \(error!.localizedDescription)")
                         return
@@ -115,20 +122,43 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
                         strBase64String += "\(base64String);"
                         if index == (attachments.count - 1) {
                             self.imageString = String(strBase64String.dropLast())
-                            self.delegate = self
                             self.spinner.stopAnimating()
-                            delegate?.didFinishLoadImage(isImagesLoaded: true)
+                            delegate?.didFinishLoadingAttachment(isAttachmentLoaded: true)
                         }
                     }else {
                         print("Couldn't process item")
                     }
                 }
+            } else if provider.hasItemConformingToTypeIdentifier(contentTypePDF) {
+                print("Content type PDF")
+                provider.loadItem(forTypeIdentifier: contentTypePDF, options: nil, completionHandler: { [unowned self] (result, error) in
+                    if result !=  nil {
+                        let url = result as! URL?
+                        if url!.isFileURL {
+                            self.fileString = url?.absoluteString
+                            self.delegate?.didFinishLoadingAttachment(isAttachmentLoaded: true)
+                        }
+                    }
+                } )
+            } else if provider.hasItemConformingToTypeIdentifier(contentTypeAudio) {
+                print("Content type Audio")
+                provider.loadItem(forTypeIdentifier: contentTypeAudio, options: nil, completionHandler: { [unowned self] (result, error) in
+                    if result !=  nil {
+                        if let url = result as? URL, let audioData = try? Data(contentsOf: url) {
+                            let base64String = audioData.base64EncodedString()
+                            self.audioString = base64String
+                            self.delegate?.didFinishLoadingAttachment(isAttachmentLoaded: true)
+                        }
+                    }
+                } )
             }
         }
     }
     
-    func didFinishLoadImage(isImagesLoaded: Bool) {
-        self.openMainApp()
+    func didFinishLoadingAttachment(isAttachmentLoaded: Bool) {
+        if isAttachmentLoaded {
+            self.openMainApp()
+        }
     }
 }
 

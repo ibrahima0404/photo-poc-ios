@@ -32,10 +32,14 @@ export class HomePage implements OnInit {
   ngOnInit() {
     this.nextAppointment = this.appointmentService.loadFirstAppointment();
     this.appointments = this.appointmentService.loadAppointments();
+    let test = 'test'
+    console.log('ngOnInit', test);
     window.addEventListener("sendIntentReceived", () => {
       PluginShare.checkSendIntentReceived().then((result: any) => {
-        let images = result.image .split(";");
-        console.log('result', images.length);
+        let images = result.image.split(";");
+        console.log('file', result.file);
+        console.log('images', images.length);
+        console.log('audio', result.audio);
       });
   })
   }

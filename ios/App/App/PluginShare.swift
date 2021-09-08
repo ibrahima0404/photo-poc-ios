@@ -20,6 +20,7 @@ public class PluginShare: CAPPlugin {
                 "text": store.text,
                 "url": store.url,
                 "image": store.image,
+                "audio": store.audio,
                 "file": store.file
             ])
             store.processed = true

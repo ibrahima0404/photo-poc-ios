@@ -49,6 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         store.text = params.first(where: { $0.name == "text" })?.value! ?? ""
         store.url = params.first(where: { $0.name == "url" })?.value! ?? ""
         store.image = params.first(where: { $0.name == "image" })?.value! ?? ""
+        store.audio = params.first(where: { $0.name == "audio" })?.value! ?? ""
         store.file = params.first(where: { $0.name == "file" })?.value?.removingPercentEncoding! ?? ""
         store.processed = false
         let nc = NotificationCenter.default
