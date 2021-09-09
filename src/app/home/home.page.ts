@@ -4,10 +4,8 @@ import { IonRouterOutlet, ModalController } from '@ionic/angular';
 import { Appointment } from '../interfaces/appointment';
 import { AppointmentService } from '../services/appointment.service';
 import { SearchModalComponent } from './search-modal/search-modal.component';
-import { Plugins } from '@capacitor/core';
 import { DomSanitizer, SafeResourceUrl, SafeUrl} from '@angular/platform-browser';
 
-const { PluginShare } = Plugins;
 
 @Component({
   selector: 'app-home',
@@ -31,17 +29,7 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     this.nextAppointment = this.appointmentService.loadFirstAppointment();
-    this.appointments = this.appointmentService.loadAppointments();
-    let test = 'test'
-    console.log('ngOnInit', test);
-    window.addEventListener("sendIntentReceived", () => {
-      PluginShare.checkSendIntentReceived().then((result: any) => {
-        let images = result.image.split(";");
-        console.log('file', result.file);
-        console.log('images', images.length);
-        console.log('audio', result.audio);
-      });
-  })
+    this.appointments = this.appointmentService.loadAppointments();  
   }
 
   async openSearchModal() {

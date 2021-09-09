@@ -7,9 +7,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     let store = ShareStore.store
-
+    let groupName = "group.ionic.ios.sesame.poc.sar.entreprise"
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+     
+        Timer.scheduledTimer(timeInterval: 0.2, target: self, selector: #selector(processSendIntent), userInfo: nil, repeats: false)
         return true
     }
 
@@ -32,6 +35,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(_ application: UIApplication) {
+        if let prefs = UserDefaults(suiteName: groupName) {
+            if let appURL = prefs.object(forKey: "appURL") as? String {
+                prefs.removeObject(forKey: "appURL")
+            }
+        }
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
@@ -45,7 +53,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let params = components.queryItems else {
                 return false
         }
-
+        sendIntent(with: params)
+        
+        return success
+    }
+    
+    @objc private func processSendIntent() {
+        if let prefs = UserDefaults(suiteName: groupName) {
+            if let appURL = prefs.object(forKey: "appURL") as? String {
+                prefs.removeObject(forKey: "appURL")
+                guard let components = NSURLComponents(url: URL(string: appURL)!, resolvingAgainstBaseURL: true),
+                    let params = components.queryItems else {
+                        return
+                }
+                sendIntent(with: params)
+            }
+        }
+    }
+    
+    private func sendIntent(with params: [URLQueryItem]) {
         store.text = params.first(where: { $0.name == "text" })?.value! ?? ""
         store.url = params.first(where: { $0.name == "url" })?.value! ?? ""
         store.image = params.first(where: { $0.name == "image" })?.value! ?? ""
@@ -54,7 +80,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         store.processed = false
         let nc = NotificationCenter.default
         nc.post(name: Notification.Name("triggerSendIntent"), object: nil )
-        return success
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {

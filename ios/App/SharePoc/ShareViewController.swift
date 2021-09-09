@@ -22,7 +22,7 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
     private let messageLoadingSeveralPhotos = "Chargement de %@ vos photos"
     private let messageLoadingOnePhoto = "Chargement de votre photo"
     private var appURL = "sar.poc.sesame.ios.ionic://?text="
-    
+    private let groupName = "group.ionic.ios.sesame.poc.sar.entreprise"
     let spinner = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
     let infoLabel = UILabel()
 
@@ -157,6 +157,9 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
     
     func didFinishLoadingAttachment(isAttachmentLoaded: Bool) {
         if isAttachmentLoaded {
+            if let prefs = UserDefaults(suiteName: groupName) {
+                prefs.set(appURL, forKey: "appURL")
+            }
             self.openMainApp()
         }
     }
