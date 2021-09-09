@@ -36,7 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
         if let prefs = UserDefaults(suiteName: groupName) {
-            if let appURL = prefs.object(forKey: "appURL") as? String {
+            if let _ = prefs.object(forKey: "appURL") as? String {
                 prefs.removeObject(forKey: "appURL")
             }
         }
