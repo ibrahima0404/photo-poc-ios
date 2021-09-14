@@ -13,7 +13,7 @@ import Photos
 public class PluginShare: CAPPlugin {
     
     let store = ShareStore.store
-
+    let groupName = "group.ionic.ios.sesame.poc.sar.entreprise"
     @objc func checkSendIntentReceived(_ call: CAPPluginCall) {
         if !store.processed {
             call.resolve([

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="18154" systemVersion="20G95" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="ShareEntity" representedClassName="ShareEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="audio" optional="YES" attributeType="String"/>
+        <attribute name="file" optional="YES" attributeType="String"/>
+        <attribute name="image" optional="YES" attributeType="String"/>
+    </entity>
+    <elements>
+        <element name="ShareEntity" positionX="-54" positionY="-9" width="128" height="74"/>
+    </elements>
+</model>

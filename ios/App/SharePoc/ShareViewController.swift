@@ -9,11 +9,11 @@ import UIKit
 import Social
 import CoreServices
 
-protocol  ShareViewControllerDelegate {
+protocol ShareViewControllerDelegate {
     func didFinishLoadingAttachment(isAttachmentLoaded: Bool)
 }
 
-class ShareViewController: SLComposeServiceViewController, ShareViewControllerDelegate {
+class ShareViewController: UIViewController, ShareViewControllerDelegate {
     
     private var imageString: String?
     private var audioString: String?
@@ -21,13 +21,31 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
     private var delegate: ShareViewControllerDelegate?
     private let messageLoadingSeveralPhotos = "Chargement de %@ vos photos"
     private let messageLoadingOnePhoto = "Chargement de votre photo"
-    private var appURL = "sar.poc.sesame.ios.ionic://?text="
+    private var appURL = "sar.poc.sesame.ios.ionic://"
     private let groupName = "group.ionic.ios.sesame.poc.sar.entreprise"
-    let spinner = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
-    let infoLabel = UILabel()
+    private let shareButtonTitle = "Share"
+    
+    let spinner: UIActivityIndicatorView = {
+        return UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
+    }()
+    
+    let infoLabel: UILabel = {
+        let infoLabel = UILabel()
+        infoLabel.translatesAutoresizingMaskIntoConstraints = false
+        infoLabel.font = UIFont.boldSystemFont(ofSize: 15)
+        return infoLabel
+    }()
+    
+    let shareButton: UIButton = {
+        let validateButton = UIButton()
+        validateButton.translatesAutoresizingMaskIntoConstraints = false
+        validateButton.layer.cornerRadius = 3.0
+        validateButton.backgroundColor = .blue
+        validateButton.addTarget(self, action: #selector(validateAction), for: .touchUpInside)
+        return validateButton
+    }()
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewDidLoad() {
         self.delegate = self
 
         setupLoadingView()
@@ -40,25 +58,42 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
         infoLabel.textColor = .white
         
         spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.hidesWhenStopped = true
         spinner.startAnimating()
         
         let customView = UIView(frame: view.frame)
         customView.backgroundColor = UIColor(red: 175/255, green: 20/255, blue: 30/255, alpha: 1.0)
+        shareButton.setTitle(shareButtonTitle, for: .normal)
+        shareButton.isEnabled = false
+        shareButton.backgroundColor = .gray
         
         customView.addSubview(spinner)
         customView.addSubview(infoLabel)
+        customView.addSubview(shareButton)
         view.addSubview(customView)
         
+  
         NSLayoutConstraint.activate([
+            infoLabel.bottomAnchor.constraint(equalTo: view.topAnchor, constant: 250),
+            infoLabel.centerXAnchor.constraint(equalTo: customView.centerXAnchor),
+            infoLabel.heightAnchor.constraint(equalToConstant: 40)
+        ])
+        
+        NSLayoutConstraint.activate([
+            spinner.topAnchor.constraint(equalTo: infoLabel.bottomAnchor, constant: 20),
             spinner.centerXAnchor.constraint(equalTo: customView.centerXAnchor),
-            spinner.centerYAnchor.constraint(equalTo: customView.centerYAnchor),
             ])
         
         NSLayoutConstraint.activate([
-            infoLabel.bottomAnchor.constraint(equalTo: spinner.topAnchor, constant: -20),
-            infoLabel.centerXAnchor.constraint(equalTo: customView.centerXAnchor),
-            infoLabel.heightAnchor.constraint(equalToConstant: 40)
-            ])
+            shareButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            shareButton.topAnchor.constraint(equalTo: spinner.bottomAnchor, constant:35),
+            shareButton.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier:0.55),
+            shareButton.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier:0.055)
+        ])
+    }
+    
+    @objc private func validateAction() {
+        self.openMainApp()
     }
     
     private func setupLoadingMessage(with numberOfPhoto: Int) {
@@ -68,16 +103,12 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
     }
     
     private func openMainApp() {
-        appURL = appURL + "&url=" + appURL
-        appURL = appURL + "&image=" + (self.imageString ?? "")
-        appURL = appURL + "&audio=" + (self.audioString ?? "")
-        appURL = appURL + "&file=" + (self.fileString?.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) ?? "")
         let url = URL(string:  appURL)!
         self.extensionContext?.completeRequest(returningItems: nil, completionHandler: { _ in
             _ = self.openURL(url)
         })
     }
-
+    
     // Courtesy: https://stackoverflow.com/a/44499222/13363449 👇🏾
     // Function must be named exactly like this so a selector can be found by the compiler!
     // Anyway - it's another selector in another instance that would be "performed" instead.
@@ -94,7 +125,8 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
 
     private func handleSharedImages() {
         let attachments = (self.extensionContext?.inputItems.first as? NSExtensionItem)?.attachments ?? []
-        let contentTypeImage = kUTTypeJPEG as String
+        let contentTypeJpeg = kUTTypeJPEG as String
+        let contentTypePng = kUTTypePNG as String
         let contentTypePDF = kUTTypePDF as String
         let contentTypeAudio = kUTTypeAudio as String
         
@@ -103,9 +135,9 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
         setupLoadingMessage(with: attachments.count)
         for index in 0..<attachments.count {
             let provider = attachments[index]
-            if provider.hasItemConformingToTypeIdentifier(contentTypeImage) {
-                print("Content type Image")
-                provider.loadItem(forTypeIdentifier: contentTypeImage, options: nil) { [unowned self] (data, error) in
+            if provider.hasItemConformingToTypeIdentifier(contentTypeJpeg) {
+                print("Content type Jpeg")
+                provider.loadItem(forTypeIdentifier: contentTypeJpeg, options: nil) { [unowned self] (data, error) in
                     guard error == nil else {
                         print("Error loading item: \(error!.localizedDescription)")
                         return
@@ -122,7 +154,33 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
                         strBase64String += "\(base64String);"
                         if index == (attachments.count - 1) {
                             self.imageString = String(strBase64String.dropLast())
-                            self.spinner.stopAnimating()
+                            CoreDataStore.shared.storeShareAttachement(image: self.imageString, file: self.fileString, audio: self.audioString)
+                            delegate?.didFinishLoadingAttachment(isAttachmentLoaded: true)
+                        }
+                    }else {
+                        print("Couldn't process item")
+                    }
+                }
+            } else if provider.hasItemConformingToTypeIdentifier(contentTypePng) {
+                print("Content type Png")
+                provider.loadItem(forTypeIdentifier: contentTypePng, options: nil) { [unowned self] (data, error) in
+                    guard error == nil else {
+                        print("Error loading item: \(error!.localizedDescription)")
+                        return
+                    }
+
+                    if let url = data as? URL, let imageData = try? Data(contentsOf: url) {
+                        let uiImageData = UIImage(data: imageData)
+                        let imageDataPng = uiImageData?.pngData()
+                        guard let base64String = imageDataPng?.base64EncodedString() else {
+                            print("Error converting to base64")
+                            return
+                        }
+                                                
+                        strBase64String += "\(base64String);"
+                        if index == (attachments.count - 1) {
+                            self.imageString = String(strBase64String.dropLast())
+                            CoreDataStore.shared.storeShareAttachement(image: self.imageString, file: self.fileString, audio: self.audioString)
                             delegate?.didFinishLoadingAttachment(isAttachmentLoaded: true)
                         }
                     }else {
@@ -136,6 +194,7 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
                         let url = result as! URL?
                         if url!.isFileURL {
                             self.fileString = url?.absoluteString
+                            CoreDataStore.shared.storeShareAttachement(image: self.imageString, file: self.fileString, audio: self.audioString)
                             self.delegate?.didFinishLoadingAttachment(isAttachmentLoaded: true)
                         }
                     }
@@ -147,6 +206,7 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
                         if let url = result as? URL, let audioData = try? Data(contentsOf: url) {
                             let base64String = audioData.base64EncodedString()
                             self.audioString = base64String
+                            CoreDataStore.shared.storeShareAttachement(image: self.imageString, file: self.fileString, audio: self.audioString)
                             self.delegate?.didFinishLoadingAttachment(isAttachmentLoaded: true)
                         }
                     }
@@ -156,11 +216,10 @@ class ShareViewController: SLComposeServiceViewController, ShareViewControllerDe
     }
     
     func didFinishLoadingAttachment(isAttachmentLoaded: Bool) {
-        if isAttachmentLoaded {
-            if let prefs = UserDefaults(suiteName: groupName) {
-                prefs.set(appURL, forKey: "appURL")
-            }
-            self.openMainApp()
+        DispatchQueue.main.async {
+            self.shareButton.isEnabled = isAttachmentLoaded
+            self.shareButton.backgroundColor = .blue
+            self.spinner.stopAnimating()
         }
     }
 }

@@ -1,6 +1,5 @@
 import UIKit
 import Capacitor
-import FBSDKCoreKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -11,8 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-     
-        Timer.scheduledTimer(timeInterval: 0.2, target: self, selector: #selector(processSendIntent), userInfo: nil, repeats: false)
+        sendIntent()
         return true
     }
 
@@ -34,52 +32,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
     }
 
-    func applicationWillTerminate(_ application: UIApplication) {
-        if let prefs = UserDefaults(suiteName: groupName) {
-            if let _ = prefs.object(forKey: "appURL") as? String {
-                prefs.removeObject(forKey: "appURL")
-            }
-        }
+    func applicationWillTerminate(_ application: UIApplication) { 
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        var success = true
-        if CAPBridge.handleOpenUrl(url, options) {
-            success = FBSDKCoreKit.ApplicationDelegate.shared.application(app, open: url, options: options)
-        }
-
-        guard let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true),
-            let params = components.queryItems else {
-                return false
-        }
-        sendIntent(with: params)
-        
-        return success
+        sendIntent()
+        return true
     }
     
-    @objc private func processSendIntent() {
-        if let prefs = UserDefaults(suiteName: groupName) {
-            if let appURL = prefs.object(forKey: "appURL") as? String {
-                prefs.removeObject(forKey: "appURL")
-                guard let components = NSURLComponents(url: URL(string: appURL)!, resolvingAgainstBaseURL: true),
-                    let params = components.queryItems else {
-                        return
-                }
-                sendIntent(with: params)
+    private func sendIntent() {
+        if let shareEntity = CoreDataStore.shared.getSharedAttachement() {
+            store.image = shareEntity.image ?? ""
+            store.audio = shareEntity.audio ?? ""
+            store.file = shareEntity.file ?? ""
+            store.processed = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                let nc = NotificationCenter.default
+                nc.post(name: Notification.Name("triggerSendIntent"), object: nil )
             }
+            CoreDataStore.shared.clearCoreDataStore()
         }
-    }
-    
-    private func sendIntent(with params: [URLQueryItem]) {
-        store.text = params.first(where: { $0.name == "text" })?.value! ?? ""
-        store.url = params.first(where: { $0.name == "url" })?.value! ?? ""
-        store.image = params.first(where: { $0.name == "image" })?.value! ?? ""
-        store.audio = params.first(where: { $0.name == "audio" })?.value! ?? ""
-        store.file = params.first(where: { $0.name == "file" })?.value?.removingPercentEncoding! ?? ""
-        store.processed = false
-        let nc = NotificationCenter.default
-        nc.post(name: Notification.Name("triggerSendIntent"), object: nil )
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
